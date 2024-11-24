@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогноз погоды</title>
+    <style>
+        /* Основные стили */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e3f2fd, #ffffff);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #444;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #666;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        input, button {
+            padding: 15px 20px;
+            border-radius: 20px;
+            border: none;
+            margin: 10px 5px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input {
+            width: 70%;
+            max-width: 300px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            color: #333;
+            text-align: center;
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        button {
+            background: #0288d1;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0277bd;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #weatherInfo {
+            margin-top: 20px;
+            display: none;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        #weatherInfo.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #weatherInfo h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #333;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .forecast-day {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f1f8e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .forecast-day:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .forecast-day strong {
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        .back-btn {
+            margin-top: 30px; /* Увеличен отступ сверху */
+            padding: 10px 20px;
+            background: #e57373;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+
+        .back-btn:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Прогноз погоды</h1>
+        <h2>Введите город и узнайте погоду</h2>
+    </header>
+
+    <main id="mainContent">
+        <input type="text" id="location" placeholder="Введите город" />
+        <button id="getWeather">Узнать погоду</button>
+    </main>
+
+    <section id="weatherInfo">
+        <h3 id="currentCity"></h3>
+        <p id="currentTemp"></p>
+        <p id="currentDescription"></p>
+
+        <h3>Прогноз на 5 дней</h3>
+        <div id="forecast"></div>
+
+        <a href="#" class="back-btn" id="backBtn">Вернуться</a>
+    </section>
+
+    <script>
+        const mainContent = document.getElementById('mainContent');
+        const weatherInfo = document.getElementById('weatherInfo');
+        const backBtn = document.getElementById('backBtn');
+
+        document.getElementById('getWeather').addEventListener('click', async () => {
+            const location = document.getElementById('location').value;
+
+            if (!location) {
+                alert('Пожалуйста, введите город');
+                return;
+            }
+
+            try {
+                const response = await fetch('/get_weather', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ city: location }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(errorData.error || 'Ошибка сервера');
+                    return;
+                }
+
+                const data = await response.json();
+                mainContent.style.display = 'none';
+                weatherInfo.classList.add('visible');
+
+                document.getElementById('currentCity').textContent = `Город: ${data.current.city}`;
+                document.getElementById('currentTemp').textContent = `Температура: ${data.current.temp}°C`;
+                document.getElementById('currentDescription').textContent = `Описание: ${data.current.description}`;
+
+                const forecastDiv = document.getElementById('forecast');
+                forecastDiv.innerHTML = '';
+                const uniqueDates = new Set();
+
+                data.forecast.forEach((day) => {
+                    const date = new Date(day.date).toLocaleDateString('ru-RU', {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'long',
+                    });
+
+                    if (!uniqueDates.has(date)) {
+                        uniqueDates.add(date);
+                        const forecastEl = document.createElement('div');
+                        forecastEl.className = 'forecast-day';
+                        forecastEl.innerHTML = `
+                            <strong>${date}</strong>
+                            <span>${day.temp}°C, ${day.description}</span>
+                        `;
+                        forecastEl.addEventListener('click', () => {
+                            localStorage.setItem('selectedDay', JSON.stringify(day));
+                            window.location.href = 'details.html';
+                        });
+                        forecastDiv.appendChild(forecastEl);
+                    }
+                });
+            } catch (error) {
+                alert('Произошла ошибка. Попробуйте снова.');
+            }
+        });
+
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            mainContent.style.display = 'flex';
+            weatherInfo.classList.remove('visible');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подробная погода</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f1f8e9, #ffffff);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .details-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+            animation: fadeIn 0.8s ease-out;
+            min-height: 200px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .back-btn {
+            margin-top: 30px; /* Отступ сверху, чтобы кнопка не прилегала к тексту */
+            padding: 12px 25px;
+            background: #0288d1;
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #0277bd;
+            transform: scale(1.05);
+        }
+
+        p {
+            margin: 10px 0; /* Увеличиваем вертикальные отступы текста */
+            font-size: 1.2rem;
+            color: #666;
+            text-align: center;
+        }
+
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="details-container">
+        <h1 id="detailsDate">День</h1>
+        <p id="detailsTemp">Температура: </p>
+        <p id="detailsDesc">Описание: </p>
+        <p id="detailsWind">Ветер: </p>
+        <p id="detailsHumidity">Влажность: </p>
+        <a href="/" class="back-btn">Назад</a>
+
+    </div>
+
+    <script>
+        const selectedDay = JSON.parse(localStorage.getItem('selectedDay'));
+
+        if (selectedDay) {
+            const date = new Date(selectedDay.date).toLocaleDateString('ru-RU', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+    });
+
+    document.getElementById('detailsDate').textContent = `Погода на ${date}`;
+    document.getElementById('detailsTemp').textContent = `Температура: ${selectedDay.temp}°C`;
+    document.getElementById('detailsDesc').textContent = `Описание: ${selectedDay.description}`;
+    document.getElementById('detailsWind').textContent = `Скорость ветра: ${selectedDay.wind || 'Данные недоступны'} м/с`;
+    document.getElementById('detailsHumidity').textContent = `Влажность: ${selectedDay.humidity || 'Данные недоступны'}%`;
+    } else {
+    document.body.innerHTML = '<p>Данные о погоде не найдены.</p>';
+    }
+
+    </script>
+</body>
+</html>

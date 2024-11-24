@@ -79,12 +79,14 @@ The application will be available at [http://127.0.0.1:5000](http://127.0.0.1:50
 ### Main Page:
 - Enter the name of a city to get the current weather and a 5-day forecast.
 
-![Main Page](screenshots/main_page.png)
+![image](https://github.com/user-attachments/assets/6e767542-23d4-407a-9202-a2aefb992c62)
+
 
 ### Detailed Forecast:
 - Click on a specific day to view detailed information, such as temperature, wind speed, and humidity.
 
-![Detailed Forecast](screenshots/details_page.png)
+![image](https://github.com/user-attachments/assets/2d1b9ea8-4d24-49a7-a7c2-b6469dc39774)
+
 
 ---
 
